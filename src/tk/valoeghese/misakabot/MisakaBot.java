@@ -45,7 +45,7 @@ public class MisakaBot extends ListenerAdapter {
 			Command command = Command.get(commandName);
 
 			if (command != null) {
-				event.getChannel().sendMessage(command.handle(commandString.substring(commandFinalIndex), commandPrefix));
+				event.getChannel().sendMessage(command.handle(commandString.substring(commandFinalIndex), commandPrefix)).queue();
 			}
 		}
 	}
