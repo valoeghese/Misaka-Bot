@@ -73,14 +73,10 @@ public class UserCharacter {
 
 		public UserCharacter build() {
 			if (this.potentialAbility == -1) {
-				this.potentialAbility = 0.2f + skewDistribution(ABILITY_RANDOM.nextFloat());
+				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
 			}
 
 			return new UserCharacter(this);
 		}
-	}
-
-	private static float skewDistribution(float f0to1) {
-		return f0to1;
 	}
 }

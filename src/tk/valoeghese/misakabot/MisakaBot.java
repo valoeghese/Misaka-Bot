@@ -1,5 +1,7 @@
 package tk.valoeghese.misakabot;
 
+import java.util.Locale;
+
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -62,6 +64,7 @@ public class MisakaBot extends ListenerAdapter {
 		return DiscordMessage.createEmbedMessage(() -> new EmbedBuilder()
 				.setTitle(character.name)
 				.setDescription(new StringBuilder()
+						.append("**Gender**: ").append(character.gender.toString().toLowerCase(Locale.ROOT)).append('\n')
 						.append("**Ability**: ").append(character.ability.getDisplayName()).append('\n')
 						.append("**Level**: ").append(String.valueOf(character.abilityLevel)))
 				.addField("potential", String.valueOf(character.potentialAbility), true)
