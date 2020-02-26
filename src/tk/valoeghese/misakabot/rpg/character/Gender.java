@@ -20,4 +20,18 @@ public enum Gender {
 
 	public final String subjPron, objPron, genPron, posAdj;
 	public final String subjPronLower, objPronLower, genPronLower, posAdjLower;
+
+	public static Gender ofEntered(String msgDisplay) {
+		msgDisplay = msgDisplay.toUpperCase();
+
+		if (msgDisplay.equals("M") || msgDisplay.equals("MALE")) {
+			return MALE;
+		} else if (msgDisplay.equals("F") || msgDisplay.equals("FEMALE")) {
+			return FEMALE;
+		} else if (msgDisplay.equals("O") || msgDisplay.equals("OTHER")) {
+			return OTHER;
+		} else {
+			return null;
+		}
+	}
 }

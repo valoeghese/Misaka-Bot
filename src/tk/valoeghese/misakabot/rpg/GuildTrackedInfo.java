@@ -26,7 +26,7 @@ public final class GuildTrackedInfo extends TrackedInfo {
 		this.put("prefix", this.prefix);
 	}
 
-	public UserTrackedInfo getUser(long id) {
+	public UserTrackedInfo getUserInfo(long id) {
 		return this.userInfoMap.computeIfAbsent(id, UserTrackedInfo::new);
 	}
 

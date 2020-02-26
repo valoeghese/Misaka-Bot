@@ -4,11 +4,19 @@ import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
 import tk.valoeghese.misakabot.util.FloatRandom;
 import tk.valoeghese.misakabot.util.RandomUtils;
 
-public class Character {
-	private Character(Builder builder) {
+public class UserCharacter {
+	private UserCharacter(Builder builder) {
 		this.gender = builder.gender;
 		this.name = builder.name;
 		this.potentialAbility = builder.potentialAbility;
+		this.xp = builder.xp;
+		this.calculateLevel();
+
+		if (builder.ability != null) {
+			this.ability = builder.ability;
+		} else {
+			this.ability = this.abilityLevel == 0 ? EsperAbility.LEVEL_0 : EsperAbility.random();
+		}
 	}
 
 	public final Gender gender;
@@ -17,7 +25,7 @@ public class Character {
 	public EsperAbility ability;
 	public float xp = 1.0f; // xp for calculations
 	public int abilityLevel;
-	
+
 	public void calculateLevel() {
 		this.abilityLevel = (int) Math.floor(3 * this.potentialAbility + Math.log10(1.0f + this.xp) + (this.potentialAbility / 3.0f));
 	}
@@ -34,7 +42,9 @@ public class Character {
 
 		private Gender gender;
 		private String name;
-		private float potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
+		private float potentialAbility = -1;
+		private float xp = 1.0f;
+		private EsperAbility ability = null;
 
 		public Builder gender(Gender gender) {
 			this.gender = gender;
@@ -46,8 +56,27 @@ public class Character {
 			return this;
 		}
 
-		public Character build() {
-			return new Character(this);
+		public Builder potentialAbility(float potentialAbility) { // used in loading data
+			this.potentialAbility = potentialAbility;
+			return this;
+		}
+
+		public Builder xp(float xp) { // used in loading data
+			this.xp = xp;
+			return this;
+		}
+
+		public Builder ability(EsperAbility ability) { // used in loading data
+			this.ability = ability;
+			return this;
+		}
+
+		public UserCharacter build() {
+			if (this.potentialAbility == -1) {
+				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
+			}
+
+			return new UserCharacter(this);
 		}
 	}
 }

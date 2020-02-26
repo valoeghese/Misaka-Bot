@@ -1,5 +1,7 @@
 package tk.valoeghese.misakabot.rpg.ability;
 
+import tk.valoeghese.misakabot.util.RandomUtils;
+
 public enum EsperAbility { // "norokyusha"
 	LEVEL_0,       // esper without ability
 	ELECTROMASTER,
@@ -13,5 +15,20 @@ public enum EsperAbility { // "norokyusha"
 	TELEPATHY,
 	FLOAT_DIAL,
 	CLAIRVOYANCE,
-	ELECTRON_BEAM // meltdowner
+	ELECTRON_BEAM ;// meltdowner
+
+	private EsperAbility() {
+		this.name = this.toString().replace('_', ' ');
+	}
+
+	private final String name;
+
+	public String getName() {
+		return this.name;
+	}
+
+	public static EsperAbility random() {
+		EsperAbility[] values = EsperAbility.values();
+		return values[RandomUtils.RAND.nextInt(values.length - 1) + 1];
+	}
 }

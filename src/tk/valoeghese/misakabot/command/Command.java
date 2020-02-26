@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.internal.entities.DataMessage;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.MessageChannel;
+import net.dv8tion.jda.api.entities.User;
+import tk.valoeghese.misakabot.util.discord.DiscordMessage;
 
 public class Command {
 	private Command(Builder builder) {
@@ -24,7 +26,7 @@ public class Command {
 	private final int mandatoryArgs;
 	public final String name;
 
-	public Message handle(String request, String prefix) {
+	public DiscordMessage handle(String request, String prefix, User sender, Guild guild, MessageChannel channel) {
 		char[] cArr = request.toCharArray();
 		Map<String, String> values = new HashMap<>();
 		StringBuilder sb = new StringBuilder();
@@ -77,18 +79,18 @@ public class Command {
 		}
 
 		if (index < this.mandatoryArgs) {
-			return new DataMessage(false, new StringBuilder("Invalid number of args! ")
-					.append(String.valueOf(index))
+			final int indexx = index;
+			DiscordMessage.createTextMessage(() -> new StringBuilder("Invalid number of args! ")
+					.append(String.valueOf(indexx))
 					.append("/")
-					.append(String.valueOf(this.mandatoryArgs))
+					.append(String.valueOf(mandatoryArgs))
 					.append(" required args.\nSyntax: ")
 					.append(prefix)
 					.append(this.toString())
-					.toString(),
-					null, null);
+					.toString());
 		}
 
-		return this.callback.get(values::get);
+		return this.callback.get(values::get, sender, guild, channel);
 	}
 
 	@Override
@@ -145,12 +147,22 @@ public class Command {
 			return this;
 		}
 
-		public Builder callback(CommandResponder callback) {
+		public Builder textCallback(CommandTextResponder callback) {
 			this.callback = callback;
 			return this;
 		}
 
-		public Builder simpleCallback(CommandTextResponder callback) {
+		public Builder embedCallback(CommandEmbedResponder callback) {
+			this.callback = callback;
+			return this;
+		}
+
+		public Builder simpleCallback(CommandSimpleTextResponder callback) {
+			this.callback = callback;
+			return this;
+		}
+
+		public Builder callback(CommandResponder callback) {
 			this.callback = callback;
 			return this;
 		}

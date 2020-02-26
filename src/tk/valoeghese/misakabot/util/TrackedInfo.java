@@ -20,6 +20,10 @@ public abstract class TrackedInfo {
 		return (int) this.trackedInfo.get(key);
 	}
 
+	public final long getLong(String key) {
+		return (long) this.trackedInfo.get(key);
+	}
+
 	public final char getChar(String key) {
 		return (char) this.trackedInfo.get(key);
 	}
@@ -32,17 +36,25 @@ public abstract class TrackedInfo {
 		return (float) this.trackedInfo.get(key);
 	}
 
+	public final <T extends Enum<?>> T getEnum(String key, T[] values) {
+		return values[(int) this.trackedInfo.get(key)];
+	}
+
 	public final boolean containsKey(String key) {
 		return this.trackedInfo.containsKey(key);
 	}
 
 	/**
-	 * @param <T> Boolean, String, Integer, Character, or Float.
+	 * @param <T> Boolean, String, Integer, Long, Character, Enum, or Float.
 	 * @param key the key for the data hashmap.
 	 * @param value the value for the data hashmap.
 	 */
 	public final <T> void put(String key, T value) {
-		this.trackedInfo.put(key, value);
+		if (value instanceof Enum) {
+			this.trackedInfo.put(key, ((Enum<?>) value).ordinal());
+		} else {
+			this.trackedInfo.put(key, value);
+		}
 	}
 
 	public void writeData(BinaryData data) {
@@ -57,6 +69,11 @@ public abstract class TrackedInfo {
 			{
 				tracked.writeString("i" + key);
 				tracked.writeInt((int) value);
+			}
+			else if (value instanceof Long)
+			{
+				tracked.writeString("j" + key);
+				tracked.writeLong((long) value);
 			}
 			else if (value instanceof Character)
 			{
@@ -98,6 +115,9 @@ public abstract class TrackedInfo {
 					break;
 				case 'i':
 					this.trackedInfo.put(key.getValue(), (int) value);
+					break;
+				case 'j':
+					this.trackedInfo.put(key.getValue(), (long) value);
 					break;
 				case 'c':
 					this.trackedInfo.put(key.getValue(), (char) value);
