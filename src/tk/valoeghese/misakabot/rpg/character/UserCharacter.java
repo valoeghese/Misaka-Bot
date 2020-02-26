@@ -23,11 +23,11 @@ public class UserCharacter {
 	public final String name;
 	public final float potentialAbility;
 	public EsperAbility ability;
-	public float xp = 1.0f; // xp for calculations
+	public float xp = 0.0f; // xp for calculations
 	public int abilityLevel;
 
-	public void calculateLevel() {
-		this.abilityLevel = (int) Math.floor(3 * this.potentialAbility + Math.log10(1.0f + this.xp) + (this.potentialAbility / 3.0f));
+	public void calculateLevel() { // https://www.desmos.com/calculator/amkiawswds
+		this.abilityLevel = (int) Math.floor((3 * this.potentialAbility * Math.log10(this.xp + 1.0f)) + (2 * this.potentialAbility));
 	}
 
 	public static Builder builder() {
@@ -43,7 +43,7 @@ public class UserCharacter {
 		private Gender gender;
 		private String name;
 		private float potentialAbility = -1;
-		private float xp = 1.0f;
+		private float xp = 0.0f;
 		private EsperAbility ability = null;
 
 		public Builder gender(Gender gender) {
@@ -73,10 +73,14 @@ public class UserCharacter {
 
 		public UserCharacter build() {
 			if (this.potentialAbility == -1) {
-				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
+				this.potentialAbility = 0.2f + skewDistribution(ABILITY_RANDOM.nextFloat());
 			}
 
 			return new UserCharacter(this);
 		}
+	}
+
+	private static float skewDistribution(float f0to1) {
+		return f0to1;
 	}
 }

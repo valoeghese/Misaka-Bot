@@ -26,6 +26,14 @@ public class Command {
 	private final int mandatoryArgs;
 	public final String name;
 
+	public String getArgKey(int index) {
+		if (index < this.args.length) {
+			return this.args[index].name;
+		} else {
+			return "_"; // throwaway
+		}
+	}
+
 	public DiscordMessage handle(String request, String prefix, User sender, Guild guild, MessageChannel channel) {
 		char[] cArr = request.toCharArray();
 		Map<String, String> values = new HashMap<>();
@@ -38,7 +46,7 @@ public class Command {
 			case '"':
 				if (quote == '"') {
 					quote = ' ';
-					values.put(this.args[index++].name, sb.toString());
+					values.put(getArgKey(index++), sb.toString());
 					sb = new StringBuilder();
 				} else if (quote == '\'') {
 					sb.append(c);
@@ -50,7 +58,7 @@ public class Command {
 			case '\'':
 				if (quote == '\'') {
 					quote = ' ';
-					values.put(this.args[index++].name, sb.toString());
+					values.put(getArgKey(index++), sb.toString());
 					sb = new StringBuilder();
 				} else if (quote == '"') {
 					sb.append(c);
@@ -61,7 +69,11 @@ public class Command {
 				break;
 			case ' ':
 				if (quote == ' ') {
-					values.put(this.args[index++].name, sb.toString());
+					String value = sb.toString();
+
+					if (!value.isEmpty()) {
+						values.put(getArgKey(index++), value);
+					}
 					sb = new StringBuilder();
 				} else {
 					sb.append(c);
@@ -75,7 +87,7 @@ public class Command {
 		String finalArg = sb.toString();
 
 		if (!finalArg.isEmpty()) {
-			values.put(this.args[index++].name, sb.toString());
+			values.put(getArgKey(index++), sb.toString());
 		}
 
 		if (index < this.mandatoryArgs) {

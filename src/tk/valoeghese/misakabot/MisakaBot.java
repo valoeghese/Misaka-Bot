@@ -29,11 +29,11 @@ public class MisakaBot extends ListenerAdapter {
 			.simpleCallback(cmdArgs -> "pong")
 			.build();
 
-		Command.builder()
+		Command.builder() //
 			.name("character")
 			.callback((cmdArgs, sender, guild, channel) -> {
 				UserTrackedInfo userInfo = GuildTrackedInfo.get(guild.getIdLong()).getUserInfo(sender.getIdLong());
-				RPGUserStage userStage = userInfo.getEnum("userStage", RPGUserStage.values());
+				RPGUserStage userStage = userInfo.getStageOrSetNotStarted();
 
 				switch (userStage) {
 				case CREATING_CHARACTER:
@@ -41,17 +41,7 @@ public class MisakaBot extends ListenerAdapter {
 					return DiscordMessage.createTextMessage("Cancelled character creation!");
 				case IN_GAME:
 					UserCharacter character = userInfo.getCharacter();
-					character.calculateLevel();
-
-					return DiscordMessage.createEmbedMessage(() ->
-						new EmbedBuilder()
-							.setTitle(sender.getName() + "'s Character")
-							.addField("Name", character.name, false)
-							.addBlankField(false)
-							.addField("Ability", character.ability.getName(), false)
-							.addField("Level", String.valueOf(character.abilityLevel), false)
-							.build()
-					);
+					return characterStatEmbed(character);
 				case NOT_STARTED:
 				default:
 					userInfo.put("userStage", RPGUserStage.CREATING_CHARACTER);
@@ -63,8 +53,19 @@ public class MisakaBot extends ListenerAdapter {
 			.build();
 
 		new JDABuilder(args[0])
-		.addEventListeners(new MisakaBot())
-		.build();
+			.addEventListeners(new MisakaBot())
+			.build();
+	}
+
+	private static DiscordMessage characterStatEmbed(UserCharacter character) {
+		character.calculateLevel();
+		return DiscordMessage.createEmbedMessage(() -> new EmbedBuilder()
+				.setTitle(character.name)
+				.setDescription(new StringBuilder()
+						.append("**Ability**: ").append(character.ability.getDisplayName()).append('\n')
+						.append("**Level**: ").append(String.valueOf(character.abilityLevel)))
+				.addField("potential", String.valueOf(character.potentialAbility), true)
+				.build());
 	}
 
 	@Override
@@ -83,12 +84,12 @@ public class MisakaBot extends ListenerAdapter {
 		if (message.startsWith(commandPrefix)) {
 			String commandString = message.substring(commandPrefix.length());
 			int commandFinalIndex = commandString.indexOf(' ');
-			String commandName = commandString.substring(0, commandFinalIndex);
+			String commandName = commandFinalIndex == -1 ? commandString : commandString.substring(0, commandFinalIndex);
 			Command command = Command.get(commandName);
 
 			if (command != null) {
-				DiscordMessage reply = command.handle(commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
-				
+				DiscordMessage reply = command.handle(commandFinalIndex == -1 ? "" : commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
+
 				if (reply.embed()) {
 					event.getChannel().sendMessage(reply.getMessageEmbed()).queue();
 				} else {
@@ -97,7 +98,7 @@ public class MisakaBot extends ListenerAdapter {
 			}
 		} else {
 			UserTrackedInfo uti = gti.getUserInfo(author.getIdLong());
-			
+
 			if (uti.containsKey("userStage")) {
 				if (uti.getEnum("userStage", RPGUserStage.values()) == RPGUserStage.CREATING_CHARACTER) {
 					if (event.getChannel().getIdLong() == uti.getLong("characterCreationBound")) {
@@ -113,7 +114,7 @@ public class MisakaBot extends ListenerAdapter {
 							break;
 						case 1:
 							Gender gender = Gender.ofEntered(msgDisplay);
-							
+
 							if (gender == null) {
 								event.getChannel().sendMessage("Gender entered does not conform to (M = male/F = female/O = other)!");
 							} else {
@@ -126,7 +127,8 @@ public class MisakaBot extends ListenerAdapter {
 										.gender(uti.getEnum("characterGender", Gender.values()))
 										.build());
 
-								event.getChannel().sendMessage("Created Character!");
+								event.getChannel().sendMessage("Created Character!").queue();
+								event.getChannel().sendMessage(characterStatEmbed(uti.getCharacter()).getMessageEmbed()).queue();
 							}
 							break;
 						}

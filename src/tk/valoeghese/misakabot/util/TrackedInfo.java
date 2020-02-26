@@ -37,7 +37,13 @@ public abstract class TrackedInfo {
 	}
 
 	public final <T extends Enum<?>> T getEnum(String key, T[] values) {
-		return values[(int) this.trackedInfo.get(key)];
+		Integer index = (Integer) this.trackedInfo.get(key);
+
+		if (index == null) {
+			return null;
+		}
+
+		return index < values.length ? values[index] : null;
 	}
 
 	public final boolean containsKey(String key) {

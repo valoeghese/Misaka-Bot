@@ -1,5 +1,7 @@
 package tk.valoeghese.misakabot.rpg.ability;
 
+import java.util.Locale;
+
 import tk.valoeghese.misakabot.util.RandomUtils;
 
 public enum EsperAbility { // "norokyusha"
@@ -18,13 +20,13 @@ public enum EsperAbility { // "norokyusha"
 	ELECTRON_BEAM ;// meltdowner
 
 	private EsperAbility() {
-		this.name = this.toString().replace('_', ' ');
+		this.name = this.toString().replace('_', ' ').toLowerCase(Locale.ROOT);
 	}
 
 	private final String name;
 
-	public String getName() {
-		return this.name;
+	public String getDisplayName() {
+		return this == LEVEL_0 ? "none" : this.name;
 	}
 
 	public static EsperAbility random() {

@@ -16,6 +16,17 @@ public final class UserTrackedInfo extends TrackedInfo {
 	private long uuid;
 	private UserCharacter character = null;
 
+	public RPGUserStage getStageOrSetNotStarted() {
+		RPGUserStage stage = this.getEnum("userStage", RPGUserStage.values());
+
+		if (stage == null) {
+			this.put("userStage", RPGUserStage.NOT_STARTED);
+			return RPGUserStage.NOT_STARTED;
+		}
+
+		return stage;
+	}
+
 	public UserCharacter getCharacter() {
 		if (this.character == null) {
 			RPGUserStage stage = this.getEnum("userStage", RPGUserStage.values());
