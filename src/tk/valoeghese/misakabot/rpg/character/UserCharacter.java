@@ -23,6 +23,7 @@ public class UserCharacter {
 	public final String name;
 	public final float potentialAbility;
 	public EsperAbility ability;
+
 	public float xp = 0.0f; // xp for calculations
 	public int abilityLevel;
 

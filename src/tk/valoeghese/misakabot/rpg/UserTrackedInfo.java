@@ -5,12 +5,12 @@ import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
 import tk.valoeghese.misakabot.rpg.character.UserCharacter;
 import tk.valoeghese.misakabot.util.TrackedInfo;
-import tk.valoeghese.sod.BinaryData;
 import tk.valoeghese.sod.DataSection;
 
 public final class UserTrackedInfo extends TrackedInfo {
 	UserTrackedInfo(long uuid) {
 		this.uuid = uuid;
+		this.put("uuid", this.uuid);
 	}
 
 	private long uuid;
@@ -47,6 +47,7 @@ public final class UserTrackedInfo extends TrackedInfo {
 
 	public void setCharacter(UserCharacter character) {
 		this.character = character;
+		this.put("characterPotential", character.potentialAbility);
 	}
 
 	public long getUUID() {
@@ -54,20 +55,15 @@ public final class UserTrackedInfo extends TrackedInfo {
 	}
 
 	@Override
-	public void readData(BinaryData data) {
+	public void readData(DataSection data) {
 		super.readData(data);
-		DataSection user = data.get("user");
-
-		if (user != null) {
-			this.uuid = user.readLong(0);
-		}
+		this.uuid = this.getLong("uuid");
 	}
 
 	@Override
-	public void writeData(BinaryData data) {
+	public void writeData(DataSection data) {
+		this.put("characterXp", character.xp);
+		this.put("characterAbility", character.ability);
 		super.writeData(data);
-		DataSection user = new DataSection();
-		user.writeLong(this.uuid);
-		data.put("user", user);
 	}
 }

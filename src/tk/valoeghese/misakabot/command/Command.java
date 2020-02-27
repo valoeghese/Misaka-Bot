@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -17,12 +18,14 @@ public class Command {
 		list.addAll(builder.optionalArgs);
 		this.args = list.toArray(new CommandEntry[0]);
 		this.callback = builder.callback;
+//		this.throwawayCallback = builder.throwawayCallback;
 		this.name = builder.name;
 		COMMAND_MAP.put(this.name, this);
 	}
 
 	private final CommandEntry[] args;
 	private final CommandResponder callback;
+//	public final CommandResponder throwawayCallback;
 	private final int mandatoryArgs;
 	public final String name;
 
@@ -117,10 +120,30 @@ public class Command {
 		return sb.toString();
 	}
 
+	public String argString() {
+		StringBuilder sb = new StringBuilder();
+		boolean flag = false;
+
+		for (CommandEntry arg : args) {
+			if (!flag) {
+				sb.append(' ');
+				flag = true;
+			}
+
+			sb.append(arg);
+		}
+
+		return sb.toString();
+	}
+
 	private static final Map<String, Command> COMMAND_MAP = new HashMap<>();
 
 	public static Command get(String name) {
 		return COMMAND_MAP.get(name);
+	}
+
+	public static void forEach(Consumer<Command> callback) {
+		COMMAND_MAP.forEach((name, command) -> callback.accept(command));
 	}
 
 	public static Builder builder() {
@@ -135,6 +158,7 @@ public class Command {
 		private List<CommandEntry> optionalArgs = new ArrayList<>();
 		private String name;
 		private CommandResponder callback;
+//		private CommandResponder throwawayCallback;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -178,6 +202,11 @@ public class Command {
 			this.callback = callback;
 			return this;
 		}
+
+//		public Builder throwawayCallback(CommandResponder callback) {
+//			this.throwawayCallback = callback;
+//			return this;
+//		}
 
 		public Command build() {
 			return new Command(this);

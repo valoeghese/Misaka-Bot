@@ -5,12 +5,15 @@ import java.util.Locale;
 import javax.security.auth.login.LoginException;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import tk.valoeghese.misakabot.command.Command;
+import tk.valoeghese.misakabot.rpg.GuildSaveManager;
 import tk.valoeghese.misakabot.rpg.GuildTrackedInfo;
 import tk.valoeghese.misakabot.rpg.UserTrackedInfo;
 import tk.valoeghese.misakabot.rpg.character.Gender;
@@ -19,6 +22,9 @@ import tk.valoeghese.misakabot.rpg.character.UserCharacter;
 import tk.valoeghese.misakabot.util.discord.DiscordMessage;
 
 public class MisakaBot extends ListenerAdapter {
+	public static JDA jda;
+	public static boolean online = true;
+
 	public static void main(String[] args) throws LoginException {
 		Command.builder() // test command 1
 			.args("arg0")
@@ -31,7 +37,7 @@ public class MisakaBot extends ListenerAdapter {
 			.simpleCallback(cmdArgs -> "pong")
 			.build();
 
-		Command.builder() //
+		Command.builder() // character creation, display, and cancelling command
 			.name("character")
 			.callback((cmdArgs, sender, guild, channel) -> {
 				UserTrackedInfo userInfo = GuildTrackedInfo.get(guild.getIdLong()).getUserInfo(sender.getIdLong());
@@ -54,9 +60,55 @@ public class MisakaBot extends ListenerAdapter {
 			})
 			.build();
 
-		new JDABuilder(args[0])
-			.addEventListeners(new MisakaBot())
+		Command.builder()
+			.name("saveRPGData")
+			.simpleCallback(cmdArgs -> {
+				try {
+					GuildTrackedInfo.forEach(GuildSaveManager::save);
+					return "Successful Save!";
+				} catch (Throwable e) {
+					return e.getMessage();
+				}
+			})
 			.build();
+
+		Command.builder()
+			.name("help")
+			.embedCallback((cmdArgs, sender, guild) -> {
+				EmbedBuilder embed = new EmbedBuilder()
+						.setTitle("Commands")
+						.setFooter("Prefix: " + GuildTrackedInfo.get(guild.getIdLong()).getCommandPrefix());
+
+				Command.forEach(command -> {
+					embed.addField(command.name, command.toString(), true);
+				});
+
+				return embed.build();
+			})
+			.build();
+
+		Command.builder()
+			.name("shutdown")
+			.callback((cmdArgs, sender, guild, channel) -> {
+				if (guild.getOwnerIdLong() == 521522396856057876L) {
+					online = false;
+					channel.sendMessage("さよなら！").queue();
+					jda.shutdown();
+					return DiscordMessage.createTextMessage("");
+				}
+
+				return DiscordMessage.createTextMessage("Only Valoeghese#3216 can shut down the bot!");
+			})
+			.build();
+
+		jda = new JDABuilder(args[0])
+				.addEventListeners(new MisakaBot())
+				.build();
+	}
+
+	@Override
+	public void onShutdown(ShutdownEvent event) {
+		GuildTrackedInfo.forEach(GuildSaveManager::save);
 	}
 
 	private static DiscordMessage characterStatEmbed(UserCharacter character) {
@@ -93,10 +145,12 @@ public class MisakaBot extends ListenerAdapter {
 			if (command != null) {
 				DiscordMessage reply = command.handle(commandFinalIndex == -1 ? "" : commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
 
-				if (reply.embed()) {
-					event.getChannel().sendMessage(reply.getMessageEmbed()).queue();
-				} else {
-					event.getChannel().sendMessage(reply.getMessageString()).queue();
+				if (online) {
+					if (reply.embed()) {
+						event.getChannel().sendMessage(reply.getMessageEmbed()).queue();
+					} else {
+						event.getChannel().sendMessage(reply.getMessageString()).queue();
+					}
 				}
 			}
 		} else {

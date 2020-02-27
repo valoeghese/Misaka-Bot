@@ -3,10 +3,9 @@ package tk.valoeghese.misakabot.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import tk.valoeghese.common.util.Flag;
 import tk.valoeghese.common.util.CharWrapper;
+import tk.valoeghese.common.util.Flag;
 import tk.valoeghese.common.util.Wrapper;
-import tk.valoeghese.sod.BinaryData;
 import tk.valoeghese.sod.DataSection;
 
 public abstract class TrackedInfo {
@@ -21,7 +20,13 @@ public abstract class TrackedInfo {
 	}
 
 	public final long getLong(String key) {
-		return (long) this.trackedInfo.get(key);
+		try {
+			return (long) this.trackedInfo.get(key);
+		} catch (NullPointerException e) {
+			System.out.println(key);
+			System.out.println(this.trackedInfo);
+			throw e;
+		}
 	}
 
 	public final char getChar(String key) {
@@ -63,52 +68,47 @@ public abstract class TrackedInfo {
 		}
 	}
 
-	public void writeData(BinaryData data) {
-		DataSection tracked = new DataSection();
+	public void writeData(DataSection data) {
 		this.trackedInfo.forEach((key, value) -> {
 			if (value instanceof Boolean) // New lines for ease of reading this long if else statement
 			{
-				tracked.writeString("z" + key);
-				tracked.writeBoolean((boolean) value);
+				data.writeString("z" + key);
+				data.writeBoolean((boolean) value);
 			}
 			else if (value instanceof Integer)
 			{
-				tracked.writeString("i" + key);
-				tracked.writeInt((int) value);
+				data.writeString("i" + key);
+				data.writeInt((int) value);
 			}
 			else if (value instanceof Long)
 			{
-				tracked.writeString("j" + key);
-				tracked.writeLong((long) value);
+				data.writeString("j" + key);
+				data.writeLong((long) value);
 			}
 			else if (value instanceof Character)
 			{
-				tracked.writeString("c" + key);
-				tracked.writeShort((short) (char) value); // yes I actually need to cast to char, then short
+				data.writeString("c" + key);
+				data.writeShort((short) (char) value); // yes I actually need to cast to char, then short
 			}
 			else if (value instanceof Float)
 			{
-				tracked.writeString("f" + key);
-				tracked.writeFloat((float) value);
+				data.writeString("f" + key);
+				data.writeFloat((float) value);
 			}
 			else if (value instanceof String)
 			{
-				tracked.writeString("s" + key);
-				tracked.writeString((String) value);
+				data.writeString("s" + key);
+				data.writeString((String) value);
 			}
 		});
-
-		data.put("tracked", tracked);
 	}
 
-	public void readData(BinaryData data) {
-		DataSection tracked = data.getOrCreate("tracked");
-
+	public void readData(DataSection data) {
 		Flag readKey = new Flag(true);
 		Wrapper<String> key = new Wrapper<>("");
 		CharWrapper type = new CharWrapper();
 
-		tracked.forEach((value) -> {
+		data.forEach((value) -> {
 			if (readKey.booleanValue()) {
 				String rawKey = (String) value;
 				key.setValue(rawKey.substring(1));
@@ -138,7 +138,5 @@ public abstract class TrackedInfo {
 				readKey.flag();
 			}
 		});
-
-		data.put("tracked", tracked);
 	}
 }
