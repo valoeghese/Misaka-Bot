@@ -9,7 +9,8 @@ import java.util.function.Consumer;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.User;
-import tk.valoeghese.misakabot.util.discord.DiscordMessage;
+import tk.valoeghese.misakabot.MisakaBot;
+import tk.valoeghese.misakabot.interaction.C2SMessage;
 
 public class Command {
 	private Command(Builder builder) {
@@ -18,14 +19,12 @@ public class Command {
 		list.addAll(builder.optionalArgs);
 		this.args = list.toArray(new CommandEntry[0]);
 		this.callback = builder.callback;
-//		this.throwawayCallback = builder.throwawayCallback;
 		this.name = builder.name;
 		COMMAND_MAP.put(this.name, this);
 	}
 
 	private final CommandEntry[] args;
 	private final CommandResponder callback;
-//	public final CommandResponder throwawayCallback;
 	private final int mandatoryArgs;
 	public final String name;
 
@@ -37,7 +36,7 @@ public class Command {
 		}
 	}
 
-	public DiscordMessage handle(String request, String prefix, User sender, Guild guild, MessageChannel channel) {
+	public C2SMessage handle(String request, String prefix, User sender, Guild guild, MessageChannel channel) {
 		char[] cArr = request.toCharArray();
 		Map<String, String> values = new HashMap<>();
 		StringBuilder sb = new StringBuilder();
@@ -95,7 +94,7 @@ public class Command {
 
 		if (index < this.mandatoryArgs) {
 			final int indexx = index;
-			DiscordMessage.createTextMessage(() -> new StringBuilder("Invalid number of args! ")
+			MisakaBot.getImplementation().createTextMessage(() -> new StringBuilder("Invalid number of args! ")
 					.append(String.valueOf(indexx))
 					.append("/")
 					.append(String.valueOf(mandatoryArgs))

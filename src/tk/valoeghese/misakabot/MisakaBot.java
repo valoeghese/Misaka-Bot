@@ -12,20 +12,25 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import tk.valoeghese.misakabot.api.DiscordImplementation;
+import tk.valoeghese.misakabot.api.Implementation;
 import tk.valoeghese.misakabot.command.Command;
+import tk.valoeghese.misakabot.interaction.C2SMessage;
 import tk.valoeghese.misakabot.rpg.GuildSaveManager;
 import tk.valoeghese.misakabot.rpg.GuildTrackedInfo;
 import tk.valoeghese.misakabot.rpg.UserTrackedInfo;
 import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
 import tk.valoeghese.misakabot.rpg.character.UserCharacter;
-import tk.valoeghese.misakabot.util.discord.DiscordMessage;
 
 public class MisakaBot extends ListenerAdapter {
 	public static JDA jda;
 	public static boolean online = true;
+	private static Implementation implementation;
 
 	public static void main(String[] args) throws LoginException {
+		setImplementation(new DiscordImplementation(args[0]));
+
 		Command.builder() // test command 1
 			.args("arg0")
 			.name("echo")
@@ -46,7 +51,7 @@ public class MisakaBot extends ListenerAdapter {
 				switch (userStage) {
 				case CREATING_CHARACTER:
 					userInfo.put("userStage", RPGUserStage.NOT_STARTED);
-					return DiscordMessage.createTextMessage("Cancelled character creation!");
+					return getImplementation().createTextMessage("Cancelled character creation!");
 				case IN_GAME:
 					UserCharacter character = userInfo.getCharacter();
 					return characterStatEmbed(character);
@@ -55,7 +60,7 @@ public class MisakaBot extends ListenerAdapter {
 					userInfo.put("userStage", RPGUserStage.CREATING_CHARACTER);
 					userInfo.put("characterCreationBound", channel.getIdLong());
 					userInfo.put("characterCreationStage", 0);
-					return DiscordMessage.createTextMessage("Started character creation! (bound to this channel)\nEnter your character's name:");
+					return getImplementation().createTextMessage("Started character creation! (bound to this channel)\nEnter your character's name:");
 				}
 			})
 			.build();
@@ -94,10 +99,10 @@ public class MisakaBot extends ListenerAdapter {
 					online = false;
 					channel.sendMessage("さよなら！").queue();
 					jda.shutdown();
-					return DiscordMessage.createTextMessage("");
+					return getImplementation().createTextMessage("");
 				}
 
-				return DiscordMessage.createTextMessage("Only Valoeghese#3216 can shut down the bot!");
+				return getImplementation().createTextMessage("Only Valoeghese#3216 can shut down the bot!");
 			})
 			.build();
 
@@ -106,14 +111,22 @@ public class MisakaBot extends ListenerAdapter {
 				.build();
 	}
 
+	private static void setImplementation(Implementation impl) {
+		implementation = impl;
+	}
+
+	public static Implementation getImplementation() {
+		return implementation;
+	}
+
 	@Override
 	public void onShutdown(ShutdownEvent event) {
 		GuildTrackedInfo.forEach(GuildSaveManager::save);
 	}
 
-	private static DiscordMessage characterStatEmbed(UserCharacter character) {
+	private static C2SMessage characterStatEmbed(UserCharacter character) {
 		character.calculateLevel();
-		return DiscordMessage.createEmbedMessage(() -> new EmbedBuilder()
+		return C2SMessage.createEmbedMessage(() -> new EmbedBuilder()
 				.setTitle(character.name)
 				.setDescription(new StringBuilder()
 						.append("**Gender**: ").append(character.gender.toString().toLowerCase(Locale.ROOT)).append('\n')
@@ -142,7 +155,7 @@ public class MisakaBot extends ListenerAdapter {
 			Command command = Command.get(commandName);
 
 			if (command != null) {
-				DiscordMessage reply = command.handle(commandFinalIndex == -1 ? "" : commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
+				C2SMessage reply = command.handle(commandFinalIndex == -1 ? "" : commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
 
 				if (online) {
 					if (reply.embed()) {

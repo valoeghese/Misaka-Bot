@@ -39,6 +39,7 @@ public final class UserTrackedInfo extends TrackedInfo {
 						.xp(this.getFloat("characterXp"))
 						.ability(this.getEnum("characterAbility", EsperAbility.values()))
 						.scores(this.getInt("social"), this.getInt("atk"), this.getInt("def"), this.getInt("speed"))
+						.perception(this.getInt("perception"))
 						.build();
 			}
 		}
@@ -69,6 +70,7 @@ public final class UserTrackedInfo extends TrackedInfo {
 		this.put("atk", character.getAttack());
 		this.put("def", character.getDefense());
 		this.put("speed", character.getSwiftness());
+		this.put("sight", character.perception);
 		super.writeData(data);
 	}
 }

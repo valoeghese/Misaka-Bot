@@ -12,6 +12,10 @@ public final class World {
 	private final Setting[] settings;
 	private final Setting starter;
 
+	public Setting getStartSetting() {
+		return starter;
+	}
+
 	public static Builder builder() {
 		return new Builder();
 	}

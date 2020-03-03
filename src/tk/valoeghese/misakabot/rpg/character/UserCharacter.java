@@ -13,6 +13,7 @@ public class UserCharacter {
 		this.potentialAbility = builder.potentialAbility;
 		this.xp = builder.xp;
 		this.userScores = builder.scores;
+		this.perception = builder.perception;
 		this.calculateLevel();
 
 		if (builder.ability != null) {
@@ -26,6 +27,7 @@ public class UserCharacter {
 	public final String name;
 	public final float potentialAbility;
 	public EsperAbility ability;
+	public int perception;
 
 	private final int[] userScores; // stats = {SOCIAL, ATTACK, DEFENSE, SWIFTNESS}
 
@@ -68,6 +70,7 @@ public class UserCharacter {
 		private float xp = 0.0f;
 		private EsperAbility ability = null;
 		private int[] scores = null;
+		private int perception;
 
 		public Builder gender(Gender gender) {
 			this.gender = gender;
@@ -98,7 +101,12 @@ public class UserCharacter {
 			this.scores = new int[]{social, atk, def, swiftness};
 			return this;
 		}
-		
+
+		public Builder perception(int perception) { // used in loading data
+			this.perception = perception;
+			return this;
+		}
+
 		public UserCharacter build() {
 			if (this.potentialAbility == -1) {
 				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
