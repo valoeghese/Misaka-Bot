@@ -119,7 +119,6 @@ public class MisakaBot extends ListenerAdapter {
 						.append("**Gender**: ").append(character.gender.toString().toLowerCase(Locale.ROOT)).append('\n')
 						.append("**Ability**: ").append(character.ability.getDisplayName()).append('\n')
 						.append("**Level**: ").append(String.valueOf(character.abilityLevel)))
-				.addField("potential", String.valueOf(character.potentialAbility), true)
 				.build());
 	}
 

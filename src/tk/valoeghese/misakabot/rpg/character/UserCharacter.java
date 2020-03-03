@@ -1,5 +1,7 @@
 package tk.valoeghese.misakabot.rpg.character;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
 import tk.valoeghese.misakabot.util.FloatRandom;
 import tk.valoeghese.misakabot.util.RandomUtils;
@@ -10,6 +12,7 @@ public class UserCharacter {
 		this.name = builder.name;
 		this.potentialAbility = builder.potentialAbility;
 		this.xp = builder.xp;
+		this.userScores = builder.scores;
 		this.calculateLevel();
 
 		if (builder.ability != null) {
@@ -24,11 +27,29 @@ public class UserCharacter {
 	public final float potentialAbility;
 	public EsperAbility ability;
 
+	private final int[] userScores; // stats = {SOCIAL, ATTACK, DEFENSE, SWIFTNESS}
+
 	public float xp = 0.0f; // xp for calculations
 	public int abilityLevel;
 
 	public void calculateLevel() { // https://www.desmos.com/calculator/amkiawswds
 		this.abilityLevel = (int) Math.floor((3 * this.potentialAbility * Math.log10(this.xp + 1.0f)) + (2 * this.potentialAbility));
+	}
+
+	public int getSocial() {
+		return this.userScores[0];
+	}
+
+	public int getAttack() {
+		return this.userScores[1];
+	}
+
+	public int getDefense() {
+		return this.userScores[2];
+	}
+
+	public int getSwiftness() {
+		return this.userScores[3];
 	}
 
 	public static Builder builder() {
@@ -46,6 +67,7 @@ public class UserCharacter {
 		private float potentialAbility = -1;
 		private float xp = 0.0f;
 		private EsperAbility ability = null;
+		private int[] scores = null;
 
 		public Builder gender(Gender gender) {
 			this.gender = gender;
@@ -71,10 +93,19 @@ public class UserCharacter {
 			this.ability = ability;
 			return this;
 		}
-
+		
+		public Builder scores(int social, int atk, int def, int swiftness) { // used in loading data
+			this.scores = new int[]{social, atk, def, swiftness};
+			return this;
+		}
+		
 		public UserCharacter build() {
 			if (this.potentialAbility == -1) {
 				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
+			}
+			
+			if (this.scores == null) {
+				this.scores = IntLists.shuffle(new IntArrayList(new int[]{8, 7, 6, 4}), RandomUtils.RAND).toArray(new int[4]);
 			}
 
 			return new UserCharacter(this);
