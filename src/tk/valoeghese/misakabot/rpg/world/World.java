@@ -16,6 +16,10 @@ public final class World {
 		return starter;
 	}
 
+	public Setting getSetting(int index) {
+		return settings[index];
+	}
+
 	public static Builder builder() {
 		return new Builder();
 	}
