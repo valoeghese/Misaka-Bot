@@ -2,12 +2,12 @@ package tk.valoeghese.misakabot.command;
 
 import java.util.function.UnaryOperator;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
 import tk.valoeghese.misakabot.interaction.C2SMessage;
+import tk.valoeghese.misakabot.interaction.ServerChannel;
+import tk.valoeghese.misakabot.interaction.ServerGuild;
+import tk.valoeghese.misakabot.interaction.ServerMember;
 
 @FunctionalInterface
 public interface CommandResponder {
-	C2SMessage get(UnaryOperator<String> argGetter, User sender, Guild server, MessageChannel channel);
+	C2SMessage get(UnaryOperator<String> argGetter, ServerMember sender, ServerGuild server, ServerChannel channel);
 }

@@ -4,18 +4,15 @@ import java.util.Locale;
 
 import javax.security.auth.login.LoginException;
 
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.events.ShutdownEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import tk.valoeghese.misakabot.api.DiscordImplementation;
 import tk.valoeghese.misakabot.api.Implementation;
 import tk.valoeghese.misakabot.command.Command;
 import tk.valoeghese.misakabot.interaction.C2SMessage;
+import tk.valoeghese.misakabot.interaction.Embed;
+import tk.valoeghese.misakabot.interaction.MessageListener;
+import tk.valoeghese.misakabot.interaction.RecieveMessageEvent;
+import tk.valoeghese.misakabot.interaction.ServerGuild;
+import tk.valoeghese.misakabot.interaction.ServerMember;
 import tk.valoeghese.misakabot.rpg.GuildSaveManager;
 import tk.valoeghese.misakabot.rpg.GuildTrackedInfo;
 import tk.valoeghese.misakabot.rpg.UserTrackedInfo;
@@ -23,8 +20,7 @@ import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
 import tk.valoeghese.misakabot.rpg.character.UserCharacter;
 
-public class MisakaBot extends ListenerAdapter {
-	public static JDA jda;
+public class MisakaBot implements MessageListener {
 	public static boolean online = true;
 	private static Implementation implementation;
 
@@ -45,22 +41,22 @@ public class MisakaBot extends ListenerAdapter {
 		Command.builder() // character creation, display, and cancelling command
 			.name("character")
 			.callback((cmdArgs, sender, guild, channel) -> {
-				UserTrackedInfo userInfo = GuildTrackedInfo.get(guild.getIdLong()).getUserInfo(sender.getIdLong());
+				UserTrackedInfo userInfo = GuildTrackedInfo.get(guild.id()).getUserInfo(sender.id());
 				RPGUserStage userStage = userInfo.getStageOrSetNotStarted();
 
 				switch (userStage) {
 				case CREATING_CHARACTER:
 					userInfo.put("userStage", RPGUserStage.NOT_STARTED);
-					return getImplementation().createTextMessage("Cancelled character creation!");
+					return C2SMessage.createTextMessage("Cancelled character creation!");
 				case IN_GAME:
 					UserCharacter character = userInfo.getCharacter();
 					return characterStatEmbed(character);
 				case NOT_STARTED:
 				default:
 					userInfo.put("userStage", RPGUserStage.CREATING_CHARACTER);
-					userInfo.put("characterCreationBound", channel.getIdLong());
+					userInfo.put("characterCreationBound", channel.id());
 					userInfo.put("characterCreationStage", 0);
-					return getImplementation().createTextMessage("Started character creation! (bound to this channel)\nEnter your character's name:");
+					return C2SMessage.createTextMessage("Started character creation! (bound to this channel)\nEnter your character's name:");
 				}
 			})
 			.build();
@@ -80,35 +76,34 @@ public class MisakaBot extends ListenerAdapter {
 		Command.builder()
 			.name("help")
 			.embedCallback((cmdArgs, sender, guild) -> {
-				EmbedBuilder embed = new EmbedBuilder()
-						.setTitle("Commands")
-						.setFooter("Prefix: " + GuildTrackedInfo.get(guild.getIdLong()).getCommandPrefix());
+				Embed embed = new Embed("Commands")
+						.setFooter("Prefix: " + GuildTrackedInfo.get(guild.id()).getCommandPrefix());
 
 				Command.forEach(command -> {
 					embed.addField(command.name, command.toString(), true);
 				});
 
-				return embed.build();
+				return embed;
 			})
 			.build();
 
 		Command.builder()
 			.name("shutdown")
 			.callback((cmdArgs, sender, guild, channel) -> {
-				if (guild.getOwnerIdLong() == 521522396856057876L) {
+				if (guild.getOwnerId() == 521522396856057876L) {
 					online = false;
-					channel.sendMessage("さよなら！").queue();
-					jda.shutdown();
-					return getImplementation().createTextMessage("");
+					channel.sendMessage("さよなら！");
+					implementation.shutdown();
+					return C2SMessage.createTextMessage("");
 				}
 
-				return getImplementation().createTextMessage("Only Valoeghese#3216 can shut down the bot!");
+				return C2SMessage.createTextMessage("Only Valoeghese#3216 can shut down the bot!");
 			})
 			.build();
 
-		jda = new JDABuilder(args[0])
-				.addEventListeners(new MisakaBot())
-				.build();
+		implementation.subscribeOnReceiveMessage(new MisakaBot());
+		implementation.setOnShutdown(() -> GuildTrackedInfo.forEach(GuildSaveManager::save));
+		implementation.start();
 	}
 
 	private static void setImplementation(Implementation impl) {
@@ -119,33 +114,27 @@ public class MisakaBot extends ListenerAdapter {
 		return implementation;
 	}
 
-	@Override
-	public void onShutdown(ShutdownEvent event) {
-		GuildTrackedInfo.forEach(GuildSaveManager::save);
-	}
-
 	private static C2SMessage characterStatEmbed(UserCharacter character) {
 		character.calculateLevel();
-		return C2SMessage.createEmbedMessage(() -> new EmbedBuilder()
-				.setTitle(character.name)
+		return new Embed(character.name)
 				.setDescription(new StringBuilder()
 						.append("**Gender**: ").append(character.gender.toString().toLowerCase(Locale.ROOT)).append('\n')
 						.append("**Ability**: ").append(character.ability.getDisplayName()).append('\n')
-						.append("**Level**: ").append(String.valueOf(character.abilityLevel)))
-				.build());
+						.append("**Level**: ").append(String.valueOf(character.abilityLevel)).toString())
+				.wrap();
 	}
 
 	@Override
-	public void onMessageReceived(MessageReceivedEvent event) {
-		User author = event.getAuthor();
+	public void onMessageReceived(RecieveMessageEvent event) {
+		ServerMember author = event.getMessageAuthor();
 
 		if (author.isBot()) {
 			return;
 		}
 
-		Guild guild = event.getGuild();
-		GuildTrackedInfo gti = GuildTrackedInfo.get(guild.getIdLong());
-		String message = event.getMessage().getContentRaw();
+		ServerGuild guild = event.getGuild();
+		GuildTrackedInfo gti = GuildTrackedInfo.get(guild.id());
+		String message = event.getMessage().getRawContent();
 		final String commandPrefix = gti.getCommandPrefix();
 
 		if (message.startsWith(commandPrefix)) {
@@ -158,28 +147,24 @@ public class MisakaBot extends ListenerAdapter {
 				C2SMessage reply = command.handle(commandFinalIndex == -1 ? "" : commandString.substring(commandFinalIndex), commandPrefix, author, event.getGuild(), event.getChannel());
 
 				if (online) {
-					if (reply.embed()) {
-						event.getChannel().sendMessage(reply.getMessageEmbed()).queue();
-					} else {
-						event.getChannel().sendMessage(reply.getMessageString()).queue();
-					}
+					event.getChannel().sendMessage(reply);
 				}
 			}
 		} else {
-			UserTrackedInfo uti = gti.getUserInfo(author.getIdLong());
+			UserTrackedInfo uti = gti.getUserInfo(author.id());
 
 			if (uti.containsKey("userStage")) {
 				if (uti.getEnum("userStage", RPGUserStage.values()) == RPGUserStage.CREATING_CHARACTER) {
-					if (event.getChannel().getIdLong() == uti.getLong("characterCreationBound")) {
+					if (event.getChannel().id() == uti.getLong("characterCreationBound")) {
 						int stage = uti.getInt("characterCreationStage");
-						String msgDisplay = event.getMessage().getContentDisplay();
+						String msgDisplay = event.getMessage().getDisplayContent();
 
 						switch (stage) {
 						case 0:
 							uti.put("characterName", msgDisplay);
 							uti.put("characterCreationStage", 1);
-							event.getChannel().sendMessage("**Character Name**: `" + msgDisplay + "`").queue();
-							event.getChannel().sendMessage("Enter your character's gender: (M = male/F = female/O = other)").queue();
+							event.getChannel().sendMessage("**Character Name**: `" + msgDisplay + "`");
+							event.getChannel().sendMessage("Enter your character's gender: (M = male/F = female/O = other)");
 							break;
 						case 1:
 							Gender gender = Gender.ofEntered(msgDisplay);
@@ -196,8 +181,8 @@ public class MisakaBot extends ListenerAdapter {
 										.gender(uti.getEnum("characterGender", Gender.values()))
 										.build());
 
-								event.getChannel().sendMessage("Created Character!").queue();
-								event.getChannel().sendMessage(characterStatEmbed(uti.getCharacter()).getMessageEmbed()).queue();
+								event.getChannel().sendMessage("Created Character!");
+								event.getChannel().sendMessage(characterStatEmbed(uti.getCharacter()));
 							}
 							break;
 						}

@@ -6,11 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.User;
-import tk.valoeghese.misakabot.MisakaBot;
 import tk.valoeghese.misakabot.interaction.C2SMessage;
+import tk.valoeghese.misakabot.interaction.ServerChannel;
+import tk.valoeghese.misakabot.interaction.ServerGuild;
+import tk.valoeghese.misakabot.interaction.ServerMember;
 
 public class Command {
 	private Command(Builder builder) {
@@ -36,7 +35,7 @@ public class Command {
 		}
 	}
 
-	public C2SMessage handle(String request, String prefix, User sender, Guild guild, MessageChannel channel) {
+	public C2SMessage handle(String request, String prefix, ServerMember sender, ServerGuild guild, ServerChannel channel) {
 		char[] cArr = request.toCharArray();
 		Map<String, String> values = new HashMap<>();
 		StringBuilder sb = new StringBuilder();
@@ -94,7 +93,7 @@ public class Command {
 
 		if (index < this.mandatoryArgs) {
 			final int indexx = index;
-			MisakaBot.getImplementation().createTextMessage(() -> new StringBuilder("Invalid number of args! ")
+			C2SMessage.createTextMessage(() -> new StringBuilder("Invalid number of args! ")
 					.append(String.valueOf(indexx))
 					.append("/")
 					.append(String.valueOf(mandatoryArgs))

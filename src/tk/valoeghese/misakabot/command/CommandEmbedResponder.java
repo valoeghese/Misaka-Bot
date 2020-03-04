@@ -2,18 +2,18 @@ package tk.valoeghese.misakabot.command;
 
 import java.util.function.UnaryOperator;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.MessageChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.User;
 import tk.valoeghese.misakabot.interaction.C2SMessage;
+import tk.valoeghese.misakabot.interaction.Embed;
+import tk.valoeghese.misakabot.interaction.ServerChannel;
+import tk.valoeghese.misakabot.interaction.ServerGuild;
+import tk.valoeghese.misakabot.interaction.ServerMember;
 
 @FunctionalInterface
 public interface CommandEmbedResponder extends CommandResponder {
-	MessageEmbed getEmbed(UnaryOperator<String> argGetter, User sender, Guild server);
+	Embed getEmbed(UnaryOperator<String> argGetter, ServerMember sender, ServerGuild server);
 
 	@Override
-	default C2SMessage get(UnaryOperator<String> argGetter, User sender, Guild server, MessageChannel channel) {
-		return C2SMessage.createEmbedMessage(() -> getEmbed(argGetter, sender, server));
+	default C2SMessage get(UnaryOperator<String> argGetter, ServerMember sender, ServerGuild server, ServerChannel channel) {
+		return getEmbed(argGetter, sender, server).wrap();
 	}
 }

@@ -2,21 +2,30 @@ package tk.valoeghese.misakabot.interaction;
 
 import java.util.function.Supplier;
 
-import net.dv8tion.jda.api.entities.MessageEmbed;
-
 public interface C2SMessage {
-	MessageEmbed getMessageEmbed();
 	String getMessageString();
+	Embed getMessageEmbed();
 	boolean embed();
 
-	static C2SMessage createEmbedMessage(Supplier<MessageEmbed> embedSupplier) {
+	static C2SMessage createTextMessage(String message) {
 		return new C2SMessage() {
 			@Override
-			public String getMessageString() { return null; }
+			public String getMessageString() { return message; }
 			@Override
-			public MessageEmbed getMessageEmbed() { return embedSupplier.get(); }
+			public Embed getMessageEmbed() { return null; }
 			@Override
-			public boolean embed() { return true; }
+			public boolean embed() { return false; }
+		};
+	}
+
+	static C2SMessage createTextMessage(Supplier<String> messageSupplier) {
+		return new C2SMessage() {
+			@Override
+			public String getMessageString() { return messageSupplier.get(); }
+			@Override
+			public Embed getMessageEmbed() { return null; }
+			@Override
+			public boolean embed() { return false; }
 		};
 	}
 }

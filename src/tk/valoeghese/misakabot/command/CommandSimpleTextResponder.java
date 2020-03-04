@@ -2,15 +2,15 @@ package tk.valoeghese.misakabot.command;
 
 import java.util.function.UnaryOperator;
 
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
+import tk.valoeghese.misakabot.interaction.ServerGuild;
+import tk.valoeghese.misakabot.interaction.ServerMember;
 
 @FunctionalInterface
 public interface CommandSimpleTextResponder extends CommandTextResponder {
 	String getString(UnaryOperator<String> argGetter);
 
 	@Override
-	default String getString(UnaryOperator<String> argGetter, User sender, Guild server) {
+	default String getString(UnaryOperator<String> argGetter, ServerMember sender, ServerGuild server) {
 		return this.getString(argGetter);
 	}
 }

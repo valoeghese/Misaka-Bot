@@ -1,10 +1,10 @@
 package tk.valoeghese.misakabot.api;
 
-import java.util.function.Supplier;
-
-import tk.valoeghese.misakabot.interaction.C2SMessage;
+import tk.valoeghese.misakabot.interaction.MessageListener;
 
 public interface Implementation {
-	C2SMessage createTextMessage(String message);
-	C2SMessage createTextMessage(Supplier<String> messageSupplier);
+	void subscribeOnReceiveMessage(MessageListener listener);
+	void start();
+	void shutdown();
+	void setOnShutdown(Runnable onShutdown);
 }
