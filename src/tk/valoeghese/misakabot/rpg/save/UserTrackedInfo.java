@@ -1,5 +1,6 @@
-package tk.valoeghese.misakabot.rpg;
+package tk.valoeghese.misakabot.rpg.save;
 
+import tk.valoeghese.misakabot.MisakaBot;
 import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
 import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
@@ -40,6 +41,7 @@ public final class UserTrackedInfo extends TrackedInfo {
 						.ability(this.getEnum("characterAbility", EsperAbility.values()))
 						.scores(this.getInt("social"), this.getInt("atk"), this.getInt("def"), this.getInt("speed"))
 						.perception(this.getInt("sight"))
+						.location(this.getInt("setting"), this.getInt("location"))
 						.build();
 			}
 		}
@@ -64,13 +66,15 @@ public final class UserTrackedInfo extends TrackedInfo {
 
 	@Override
 	public void writeData(DataSection data) {
-		this.put("characterXp", character.xp);
-		this.put("characterAbility", character.ability);
-		this.put("social", character.getSocial());
-		this.put("atk", character.getAttack());
-		this.put("def", character.getDefense());
-		this.put("speed", character.getSwiftness());
-		this.put("sight", character.perception);
+		this.put("characterXp", this.character.xp);
+		this.put("characterAbility", this.character.getEsperAbility());
+		this.put("social", this.character.getSocial());
+		this.put("atk", this.character.getAttack());
+		this.put("def", this.character.getDefense());
+		this.put("speed", this.character.getSwiftness());
+		this.put("sight", this.character.perception);
+		this.put("setting", this.character.setting.index(MisakaBot.getWorld()));
+		this.put("location", this.character.location.index());
 		super.writeData(data);
 	}
 }

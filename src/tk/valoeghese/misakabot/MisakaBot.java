@@ -13,19 +13,26 @@ import tk.valoeghese.misakabot.interaction.MessageListener;
 import tk.valoeghese.misakabot.interaction.RecieveMessageEvent;
 import tk.valoeghese.misakabot.interaction.ServerGuild;
 import tk.valoeghese.misakabot.interaction.ServerMember;
-import tk.valoeghese.misakabot.rpg.GuildSaveManager;
-import tk.valoeghese.misakabot.rpg.GuildTrackedInfo;
-import tk.valoeghese.misakabot.rpg.UserTrackedInfo;
 import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
 import tk.valoeghese.misakabot.rpg.character.UserCharacter;
+import tk.valoeghese.misakabot.rpg.save.GuildSaveManager;
+import tk.valoeghese.misakabot.rpg.save.GuildTrackedInfo;
+import tk.valoeghese.misakabot.rpg.save.UserTrackedInfo;
+import tk.valoeghese.misakabot.rpg.world.World;
+import tk.valoeghese.misakabot.rpg.world.setting.Settings;
 
 public class MisakaBot implements MessageListener {
 	public static boolean online = true;
 	private static Implementation implementation;
+	private static World world;
 
 	public static void main(String[] args) throws LoginException {
 		setImplementation(new DiscordImplementation(args[0]));
+
+		world = World.builder()
+				.initialSetting(Settings.TEST)
+				.build();
 
 		Command.builder() // test command 1
 			.args("arg0")
@@ -106,6 +113,10 @@ public class MisakaBot implements MessageListener {
 		implementation.start();
 	}
 
+	public static World getWorld() {
+		return world;
+	}
+
 	private static void setImplementation(Implementation impl) {
 		implementation = impl;
 	}
@@ -116,11 +127,11 @@ public class MisakaBot implements MessageListener {
 
 	private static C2SMessage characterStatEmbed(UserCharacter character) {
 		character.calculateLevel();
-		return new Embed(character.name)
+		return new Embed(character.getName())
 				.setDescription(new StringBuilder()
-						.append("**Gender**: ").append(character.gender.toString().toLowerCase(Locale.ROOT)).append('\n')
-						.append("**Ability**: ").append(character.ability.getDisplayName()).append('\n')
-						.append("**Level**: ").append(String.valueOf(character.abilityLevel)).toString())
+						.append("**Gender**: ").append(character.getGender().toString().toLowerCase(Locale.ROOT)).append('\n')
+						.append("**Ability**: ").append(character.getEsperAbility().getDisplayName()).append('\n')
+						.append("**Level**: ").append(String.valueOf(character.getLevel())).toString())
 				.wrap();
 	}
 
@@ -183,6 +194,7 @@ public class MisakaBot implements MessageListener {
 
 								event.getChannel().sendMessage("Created Character!");
 								event.getChannel().sendMessage(characterStatEmbed(uti.getCharacter()));
+								event.getChannel().sendMessage(uti.getCharacter().describeWorldMessage());
 							}
 							break;
 						}

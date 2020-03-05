@@ -1,8 +1,12 @@
-package tk.valoeghese.misakabot.rpg;
+package tk.valoeghese.misakabot.rpg.save;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
@@ -21,6 +25,7 @@ public final class GuildTrackedInfo extends TrackedInfo {
 
 	private long guild;
 	private final Long2ObjectMap<UserTrackedInfo> userInfoMap = new Long2ObjectArrayMap<>();
+	private final Int2ObjectMap<NPCTrackedInfo> npcInfoMap = new Int2ObjectArrayMap<>();
 	private String prefix;
 	private BinaryData loadedData = new BinaryData();
 
@@ -90,6 +95,33 @@ public final class GuildTrackedInfo extends TrackedInfo {
 					trackedUsers.add(id); // remember that this has been consumed
 
 					UserTrackedInfo userInfo = new UserTrackedInfo(id); // create and load user info
+					userInfo.readData(userData.getValue());
+					callback.accept(id, userInfo);
+				}
+			}
+		}
+	}
+
+	public void forEachNPC(GuildNPCCallback callback) {
+		IntSet trackedNPCS = new IntArraySet();
+
+		// Add loaded data
+		this.npcInfoMap.forEach((id, userInfo) -> {
+			trackedNPCS.add((int) id);
+			callback.accept(id, userInfo);
+		});
+
+		// Add data that hasn't been loaded yet but is in memory
+		for (Map.Entry<String, DataSection> userData : this.loadedData) {
+			String trackedUser = userData.getKey();
+
+			if (trackedUser.startsWith("N")) { // if it is a NPC<id> data section
+				int id = Integer.parseInt(trackedUser.substring(3)); // get id
+
+				if (!trackedNPCS.contains(id)) { // if the callback has not already consumed this id
+					trackedNPCS.add(id); // remember that this has been consumed
+
+					NPCTrackedInfo userInfo = new NPCTrackedInfo(id); // create and load user info
 					userInfo.readData(userData.getValue());
 					callback.accept(id, userInfo);
 				}

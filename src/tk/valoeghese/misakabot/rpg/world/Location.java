@@ -1,7 +1,6 @@
 package tk.valoeghese.misakabot.rpg.world;
 
-public class Location {
-	public String getDescription(int perception) {
-		return "";
-	}
+public interface Location {
+	String getDescription(int perception);
+	int index();
 }

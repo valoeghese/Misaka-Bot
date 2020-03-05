@@ -1,4 +1,4 @@
-package tk.valoeghese.misakabot.rpg;
+package tk.valoeghese.misakabot.rpg.save;
 
 @FunctionalInterface
 public interface GuildUserCallback {

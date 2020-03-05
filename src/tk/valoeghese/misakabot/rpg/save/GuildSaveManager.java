@@ -1,4 +1,4 @@
-package tk.valoeghese.misakabot.rpg;
+package tk.valoeghese.misakabot.rpg.save;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +32,13 @@ public class GuildSaveManager {
 			DataSection userInfoSection = new DataSection();
 			userInfo.writeData(userInfoSection);
 			data.put("User" + String.valueOf(id), userInfoSection);
+		});
+
+		// npc data
+		guildInfo.forEachNPC((id, npcInfo) -> {
+			DataSection npcInfoSection = new DataSection();
+			npcInfo.writeData(npcInfoSection);
+			data.put("NPC" + String.valueOf(id), npcInfoSection);
 		});
 
 		File file = new File("./guild_" + String.valueOf(guildUUID) + ".sod");

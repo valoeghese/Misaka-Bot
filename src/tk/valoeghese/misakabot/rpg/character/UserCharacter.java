@@ -2,40 +2,47 @@ package tk.valoeghese.misakabot.rpg.character;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntLists;
+import tk.valoeghese.misakabot.MisakaBot;
+import tk.valoeghese.misakabot.rpg.Esper;
 import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
+import tk.valoeghese.misakabot.rpg.world.Location;
+import tk.valoeghese.misakabot.rpg.world.setting.Setting;
 import tk.valoeghese.misakabot.util.FloatRandom;
 import tk.valoeghese.misakabot.util.RandomUtils;
 
-public class UserCharacter {
+public class UserCharacter extends AbstractCharacter implements Esper {
 	private UserCharacter(Builder builder) {
-		this.gender = builder.gender;
-		this.name = builder.name;
+		super(builder.name, builder.gender);
 		this.potentialAbility = builder.potentialAbility;
 		this.xp = builder.xp;
 		this.userScores = builder.scores;
 		this.perception = builder.perception;
+		this.setting = builder.setting;
+		this.location = builder.location;
 		this.calculateLevel();
 
-		if (builder.ability != null) {
-			this.ability = builder.ability;
-		} else {
+		if (builder.ability == null) {
 			this.ability = this.abilityLevel == 0 ? EsperAbility.LEVEL_0 : EsperAbility.random();
+		} else {
+			this.ability = builder.ability;
 		}
 	}
 
-	public final Gender gender;
-	public final String name;
 	public final float potentialAbility;
-	public EsperAbility ability;
+	private EsperAbility ability;
 	public int perception;
 
 	private final int[] userScores; // stats = {SOCIAL, ATTACK, DEFENSE, SWIFTNESS}
 
 	public float xp = 0.0f; // xp for calculations
-	public int abilityLevel;
+	private int abilityLevel; // from 0 to 5
 
 	public void calculateLevel() { // https://www.desmos.com/calculator/amkiawswds
 		this.abilityLevel = (int) Math.floor((3 * this.potentialAbility * Math.log10(this.xp + 1.0f)) + (2 * this.potentialAbility));
+
+		if (this.abilityLevel > 5) {
+			this.abilityLevel = 5;
+		}
 	}
 
 	public int getSocial() {
@@ -52,6 +59,20 @@ public class UserCharacter {
 
 	public int getSwiftness() {
 		return this.userScores[3];
+	}
+
+	public String describeWorldMessage() {
+		return this.location.getDescription(this.perception);
+	}
+
+	@Override
+	public EsperAbility getEsperAbility() {
+		return this.ability;
+	}
+
+	@Override
+	public int getLevel() {
+		return this.abilityLevel;
 	}
 
 	public static Builder builder() {
@@ -71,6 +92,8 @@ public class UserCharacter {
 		private EsperAbility ability = null;
 		private int[] scores = null;
 		private int perception;
+		private Setting setting = null;
+		private Location location = null;
 
 		public Builder gender(Gender gender) {
 			this.gender = gender;
@@ -107,13 +130,27 @@ public class UserCharacter {
 			return this;
 		}
 
+		public Builder location(int setting, int location) { // used in loading data
+			this.setting = MisakaBot.getWorld().getSetting(setting);
+			this.location = this.setting.getLocation(location);
+			return this;
+		}
+
 		public UserCharacter build() {
 			if (this.potentialAbility == -1) {
 				this.potentialAbility = 0.2f + ABILITY_RANDOM.nextFloat();
 			}
-			
+
 			if (this.scores == null) {
 				this.scores = IntLists.shuffle(new IntArrayList(new int[]{8, 7, 6, 4}), RandomUtils.RAND).toArray(new int[4]);
+			}
+
+			if (this.setting == null) {
+				this.setting = MisakaBot.getWorld().getStartSetting();
+			}
+
+			if (this.location == null) {
+				this.location = this.setting.getStartLocation();
 			}
 
 			return new UserCharacter(this);
