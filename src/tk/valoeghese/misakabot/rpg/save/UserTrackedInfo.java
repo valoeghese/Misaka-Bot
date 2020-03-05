@@ -66,15 +66,7 @@ public final class UserTrackedInfo extends TrackedInfo {
 
 	@Override
 	public void writeData(DataSection data) {
-		this.put("characterXp", this.character.xp);
-		this.put("characterAbility", this.character.getEsperAbility());
-		this.put("social", this.character.getSocial());
-		this.put("atk", this.character.getAttack());
-		this.put("def", this.character.getDefense());
-		this.put("speed", this.character.getSwiftness());
-		this.put("sight", this.character.perception);
-		this.put("setting", this.character.setting.index(MisakaBot.getWorld()));
-		this.put("location", this.character.location.index());
+		this.character.serialize(this);
 		super.writeData(data);
 	}
 }

@@ -9,6 +9,7 @@ import tk.valoeghese.misakabot.rpg.world.Location;
 import tk.valoeghese.misakabot.rpg.world.setting.Setting;
 import tk.valoeghese.misakabot.util.FloatRandom;
 import tk.valoeghese.misakabot.util.RandomUtils;
+import tk.valoeghese.misakabot.util.TrackedInfo;
 
 public class UserCharacter extends AbstractCharacter implements Esper {
 	private UserCharacter(Builder builder) {
@@ -73,6 +74,20 @@ public class UserCharacter extends AbstractCharacter implements Esper {
 	@Override
 	public int getLevel() {
 		return this.abilityLevel;
+	}
+
+	@Override
+	public void serialize(TrackedInfo info) {
+		super.serialize(info);
+		info.put("characterXp", this.xp);
+		info.put("characterAbility", this.getEsperAbility());
+		info.put("social", this.getSocial());
+		info.put("atk", this.getAttack());
+		info.put("def", this.getDefense());
+		info.put("speed", this.getSwiftness());
+		info.put("sight", this.perception);
+		info.put("setting", this.setting.index(MisakaBot.getWorld()));
+		info.put("location", this.location.index());
 	}
 
 	public static Builder builder() {

@@ -18,11 +18,13 @@ public abstract class AbstractNPC extends AbstractCharacter {
 		return this.id;
 	}
 
+	@Override
 	public void serialize(TrackedInfo info) {
 		info.put("name", this.name);
 		info.put("gender", this.gender);
 	}
 
+	@Override
 	public void deserialize(TrackedInfo info) {
 		
 	}
