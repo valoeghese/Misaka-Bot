@@ -28,6 +28,12 @@ public class MisakaBot implements MessageListener {
 	private static World world;
 
 	public static void main(String[] args) throws LoginException {
+		//Pingme.setupJDA(args[0]);
+		//return;
+		startMainService(args);
+	}
+
+	private static void startMainService(String[] args) {
 		setImplementation(new DiscordImplementation(args[0]));
 
 		world = World.builder()

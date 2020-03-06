@@ -1,6 +1,5 @@
 package tk.valoeghese.misakabot.rpg.save;
 
-import tk.valoeghese.misakabot.MisakaBot;
 import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
 import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
