@@ -13,6 +13,7 @@ import tk.valoeghese.misakabot.interaction.MessageListener;
 import tk.valoeghese.misakabot.interaction.RecieveMessageEvent;
 import tk.valoeghese.misakabot.interaction.ServerGuild;
 import tk.valoeghese.misakabot.interaction.ServerMember;
+import tk.valoeghese.misakabot.meme.Pingme;
 import tk.valoeghese.misakabot.rpg.character.Gender;
 import tk.valoeghese.misakabot.rpg.character.RPGUserStage;
 import tk.valoeghese.misakabot.rpg.character.UserCharacter;
@@ -22,8 +23,8 @@ import tk.valoeghese.misakabot.rpg.save.UserTrackedInfo;
 import tk.valoeghese.misakabot.rpg.world.World;
 import tk.valoeghese.misakabot.rpg.world.setting.Settings;
 
-public class MisakaBot implements MessageListener {
-	public static boolean online = true;
+public final class MisakaBot implements MessageListener {
+	private static boolean online = true;
 	private static Implementation implementation;
 	private static World world;
 

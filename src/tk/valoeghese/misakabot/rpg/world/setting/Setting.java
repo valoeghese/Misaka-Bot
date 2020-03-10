@@ -3,8 +3,8 @@ package tk.valoeghese.misakabot.rpg.world.setting;
 import java.util.ArrayList;
 import java.util.List;
 
-import tk.valoeghese.misakabot.rpg.world.Location;
 import tk.valoeghese.misakabot.rpg.world.World;
+import tk.valoeghese.misakabot.rpg.world.location.Location;
 
 public abstract class Setting {
 	protected Setting(String name) {

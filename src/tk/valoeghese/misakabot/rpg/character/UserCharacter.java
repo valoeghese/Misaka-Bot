@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.ints.IntLists;
 import tk.valoeghese.misakabot.MisakaBot;
 import tk.valoeghese.misakabot.rpg.Esper;
 import tk.valoeghese.misakabot.rpg.ability.EsperAbility;
-import tk.valoeghese.misakabot.rpg.world.Location;
+import tk.valoeghese.misakabot.rpg.world.location.Location;
 import tk.valoeghese.misakabot.rpg.world.setting.Setting;
 import tk.valoeghese.misakabot.util.FloatRandom;
 import tk.valoeghese.misakabot.util.RandomUtils;

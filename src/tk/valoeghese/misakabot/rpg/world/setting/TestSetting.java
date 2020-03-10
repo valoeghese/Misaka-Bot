@@ -1,6 +1,6 @@
 package tk.valoeghese.misakabot.rpg.world.setting;
 
-import tk.valoeghese.misakabot.rpg.world.Location;
+import tk.valoeghese.misakabot.rpg.world.location.Location;
 
 public final class TestSetting extends Setting implements Location {
 	public TestSetting(String name) {

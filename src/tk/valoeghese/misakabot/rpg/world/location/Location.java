@@ -1,4 +1,4 @@
-package tk.valoeghese.misakabot.rpg.world;
+package tk.valoeghese.misakabot.rpg.world.location;
 
 public interface Location {
 	String getDescription(int perception);

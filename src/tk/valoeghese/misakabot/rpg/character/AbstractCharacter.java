@@ -1,6 +1,6 @@
 package tk.valoeghese.misakabot.rpg.character;
 
-import tk.valoeghese.misakabot.rpg.world.Location;
+import tk.valoeghese.misakabot.rpg.world.location.Location;
 import tk.valoeghese.misakabot.rpg.world.setting.Setting;
 import tk.valoeghese.misakabot.util.TrackedInfo;
 
